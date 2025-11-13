@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+
+@keyframes scaleInTop {
+  0% {
+    transform: scaleY(0.5) translateY(-50px);
+    opacity: 0;
+  }
+  100% {
+    transform: scaleY(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scaleInTop 1.2s ease-out forwards;
+}
+/* global.css */
+/* global.css */
+.clip-path-polygon-container {
+  clip-path: polygon(
+    10% 0%, 90% 0%, 100% 20%, 100% 80%,
+    90% 100%, 10% 100%, 0% 80%, 0% 20%
+  );
+  border-radius: 40px; /* still keep some rounding */
+}
+
+body{
+  width: 100%;
+  overflow-x: hidden;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out;
+}

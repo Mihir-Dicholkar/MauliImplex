@@ -1,0 +1,288 @@
+import React, { useEffect, useState, useRef } from "react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import axios from "axios";
+import { motion, useInView } from "framer-motion";
+
+function Gallery() {
+  const [media, setMedia] = useState([]);
+
+  useEffect(() => {
+    const fetchMedia = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/assigned-media");
+        setMedia(res.data.data || res.data.assignedMedia || res.data || []);
+      } catch (err) {
+        console.error("Failed to load gallery media:", err);
+      }
+    };
+    fetchMedia();
+  }, []);
+
+  const getMediaByPosition = (position) =>
+    Array.isArray(media) ? media.filter((m) => m.position === position) : [];
+
+  // animation presets
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 60 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
+  };
+  const scaleUp = {
+    hidden: { opacity: 0, scale: 0.8, y: -50 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.8 } },
+  };
+  const slideInLeft = {
+    hidden: { opacity: 0, x: -80 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8 } },
+  };
+  const slideInRight = {
+    hidden: { opacity: 0, x: 80 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8 } },
+  };
+
+  const AnimatedItem = ({ children, variant }) => {
+    const ref = useRef(null);
+    const inView = useInView(ref, { once: true, margin: "-50px" });
+    return (
+      <motion.div
+        ref={ref}
+        variants={variant}
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+      >
+        {children}
+      </motion.div>
+    );
+  };
+
+  return (
+    <>
+      <Header />
+      <main
+        className="px-6 pt-32 pb-12 space-y-24 min-h-screen relative overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, #fdfcfb, #e2ebf0)",
+        }}
+      >
+        {/* soft glowing overlay */}
+        <div className="absolute inset-0 z-0">
+          <div className="w-[500px] h-[500px] bg-pink-200 opacity-30 blur-3xl rounded-full absolute top-20 left-10 animate-pulse"></div>
+          <div className="w-[500px] h-[500px] bg-blue-200 opacity-30 blur-3xl rounded-full absolute bottom-20 right-10 animate-pulse"></div>
+          <div className="w-[500px] h-[500px] bg-teal-200 opacity-30 blur-3xl rounded-full absolute bottom-40 left-10 animate-pulse"></div>
+        </div>
+
+        <div className="relative z-10">
+          {/* Section 1: Collection */}
+          <section>
+            <h2 className="text-3xl font-bold mb-10 text-center bg-gradient-to-r from-blue-700 via-indigo-800 to-purple-900 bg-clip-text text-transparent">
+              Collection & Sourcing
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {getMediaByPosition("Gallery-Portrait").map((item) => (
+                <AnimatedItem key={item._id} variant={fadeInUp}>
+                  {item.mediaType === "video" ? (
+                    <video
+                      src={item.fileUrl}
+                      autoPlay
+                      loop
+                      muted
+                      className="w-full h-72 object-cover rounded-xl shadow-lg"
+                    />
+                  ) : (
+                    <img
+                      src={item.fileUrl}
+                      alt="Collection"
+                      className="w-full h-72 object-cover rounded-xl shadow-lg"
+                    />
+                  )}
+                </AnimatedItem>
+              ))}
+
+              {/* Static fallbacks */}
+              <AnimatedItem variant={slideInLeft}>
+                <img
+                  src="https://i.pinimg.com/736x/a7/7b/c7/a77bc799fe67ce286c5fe6ab0777bcc5.jpg"
+                  alt="Collection static"
+                  className="w-full h-72 object-cover rounded-xl shadow-lg"
+                />
+              </AnimatedItem>
+              <AnimatedItem variant={slideInRight}>
+                <img
+                  src="https://media.istockphoto.com/id/2004978876/photo/strawberries-in-a-plate-on-a-wooden-table.jpg?s=612x612&w=0&k=20&c=_jCHaYs3wC-yBiq2C7Swnkv-_HXJH6Uxm2YEdhytYRs="
+                  alt="Collection static"
+                  className="w-full h-72 object-cover rounded-xl shadow-lg"
+                />
+              </AnimatedItem>
+            </div>
+          </section>
+
+          {/* Section 2: Quality */}
+          <section>
+            <h2 className="text-3xl font-bold mb-10 text-center bg-gradient-to-r from-teal-700 via-emerald-800 to-green-900 bg-clip-text text-transparent">
+              Quality & Standards
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {getMediaByPosition("Gallery-Quality").map((item, idx) => (
+                <AnimatedItem
+                  key={item._id}
+                  variant={idx % 2 === 0 ? fadeInUp : scaleUp}
+                >
+                  {item.mediaType === "video" ? (
+                    <video
+                      src={item.fileUrl}
+                      controls
+                      className="w-full h-72 object-cover rounded-xl shadow-lg"
+                    />
+                  ) : (
+                    <img
+                      src={item.fileUrl}
+                      alt="Quality"
+                      className="w-full h-72 object-cover rounded-xl shadow-lg"
+                    />
+                  )}
+                </AnimatedItem>
+              ))}
+
+              {/* Static fallback */}
+              <AnimatedItem variant={fadeInUp}>
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqdMJDkSwqh1vSyrpTeHBHaVee1q9iNIEilA&s"
+                  alt="Quality static"
+                  className="w-full h-72 object-cover rounded-xl shadow-lg"
+                />
+              </AnimatedItem>
+              <AnimatedItem variant={scaleUp}>
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfCmz5v9mD4VlVdOHkT4y9s1l4Nr5oJaQ7Vg&s"
+                  alt="Quality static"
+                  className="w-full h-72 object-cover rounded-xl shadow-lg"
+                />
+              </AnimatedItem>
+            </div>
+          </section>
+
+          {/* Section 3: Sorting */}
+          <section>
+            <h2 className="text-3xl font-bold mb-10 text-center bg-gradient-to-r from-gray-800 via-slate-900 to-black bg-clip-text text-transparent">
+              Sorting & Processing
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {getMediaByPosition("Gallery-Sorting").map((item) => (
+                <AnimatedItem key={item._id} variant={fadeInUp}>
+                  {item.mediaType === "video" ? (
+                    <video
+                      src={item.fileUrl}
+                      controls
+                      className="w-full h-72 object-cover rounded-xl shadow-lg"
+                    />
+                  ) : (
+                    <img
+                      src={item.fileUrl}
+                      alt="Sorting"
+                      className="w-full h-72 object-cover rounded-xl shadow-lg"
+                    />
+                  )}
+                </AnimatedItem>
+              ))}
+
+              {/* Static fallback */}
+              <AnimatedItem variant={slideInLeft}>
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3MCsjWRstwPg4HbpUjTAdgvXzNE8nJp3ijA&s"
+                  alt="Sorting static"
+                  className="w-full h-72 object-cover rounded-xl shadow-lg"
+                />
+              </AnimatedItem>
+            </div>
+          </section>
+
+          {/* Section 4: Products */}
+          <section>
+            <h2 className="text-3xl font-bold mb-10 text-center bg-gradient-to-r from-red-700 via-rose-800 to-purple-900 bg-clip-text text-transparent">
+              Our Products
+            </h2>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {getMediaByPosition("Gallery-Products").map((item) => (
+                <AnimatedItem key={item._id} variant={scaleUp}>
+                  {item.mediaType === "video" ? (
+                    <video
+                      src={item.fileUrl}
+                      controls
+                      className="w-full h-60 object-cover rounded-xl shadow-lg"
+                    />
+                  ) : (
+                    <img
+                      src={item.fileUrl}
+                      alt="Product"
+                      className="w-full h-60 object-cover rounded-xl shadow-lg"
+                    />
+                  )}
+                </AnimatedItem>
+              ))}
+
+              {/* Static fallbacks */}
+              <AnimatedItem variant={fadeInUp}>
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRM89yOt-j4lKr2UgA_tqujrJHbs6vrlSCuQQ&s"
+                  alt="Product static"
+                  className="w-full h-60 object-cover rounded-xl shadow-lg"
+                />
+              </AnimatedItem>
+              <AnimatedItem variant={fadeInUp}>
+                <img
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtBH2lnWr4JXvPjVgJEQoQFk0XHrDnwQU3Ng&s"
+                  alt="Product static"
+                  className="w-full h-60 object-cover rounded-xl shadow-lg"
+                />
+              </AnimatedItem>
+              <AnimatedItem variant={fadeInUp}>
+                <img
+                  src="https://media.sciencephoto.com/h1/10/12/60/h1101260-800px-wm.jpg"
+                  alt="Product static"
+                  className="w-full h-60 object-cover rounded-xl shadow-lg"
+                />
+              </AnimatedItem>
+            </div>
+          </section>
+          
+          {/* ✅ New Section: Farms & Origins */}
+          <section>
+            <h2 className="text-3xl font-bold mb-10 text-center bg-gradient-to-r from-amber-700 via-orange-800 to-yellow-900 bg-clip-text text-transparent">
+              Farms & Origins
+            </h2>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {getMediaByPosition("Gallery-Farms").map((item, idx) => (
+                <AnimatedItem
+                  key={item._id}
+                  variant={idx % 2 === 0 ? slideInLeft : slideInRight}
+                >
+                  {item.mediaType === "video" ? (
+                    <video
+                      src={item.fileUrl}
+                      controls
+                      className={`w-full h-64 object-cover rounded-xl ${gradientShadow}`}
+                    />
+                  ) : (
+                    <img
+                      src={item.fileUrl}
+                      alt="Farm Origin"
+                      className={`w-full h-64 object-cover rounded-xl ${gradientShadow}`}
+                    />
+                  )}
+                </AnimatedItem>
+              ))}
+            </div>
+          </section>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+export default Gallery;
